@@ -1,0 +1,95 @@
+/* Print Styles - Optimized for single page invoice printing */
+@media print {
+  /* Configure A4 page with minimal margins */
+  @page {
+    margin: 5mm;
+    size: A4 portrait;
+  }
+  
+  /* Reset body */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  
+  /* Hide everything except the invoice content */
+  body * {
+    visibility: hidden !important;
+  }
+  
+  /* Show only the invoice content container and its children */
+  #invoice-content-for-pdf,
+  #invoice-content-for-pdf * {
+    visibility: visible !important;
+  }
+  
+  #invoice-content-for-pdf {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 210mm !important;
+    margin: 0 !important;
+    padding: 10mm !important;
+    background: white !important;
+    transform: scale(0.95) !important;
+    transform-origin: top left !important;
+  }
+  
+  /* Force hide these specific elements */
+  #action-buttons-container,
+  #action-buttons-container *,
+  #submit-button-container,
+  #submit-button-container *,
+  [id*="header"],
+  [id*="Header"],
+  [class*="header"],
+  [class*="Header"],
+  [class*="back"],
+  [class*="Back"],
+  [class*="step"],
+  [class*="Step"],
+  [class*="navigation"],
+  [class*="Navigation"],
+  .navigationButtons,
+  .navigationButtons *,
+  button,
+  button * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Ensure single page - prevent page breaks */
+  #invoice-content-for-pdf,
+  #invoice-content-for-pdf * {
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+  }
+  
+  /* Make sure colors print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  /* Remove any shadows or effects */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  /* Optimize font sizes for print */
+  #invoice-content-for-pdf {
+    font-size: 95% !important;
+    line-height: 1.3 !important;
+  }
+  
+  /* Ensure all content fits on one page */
+  html, body {
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+}
