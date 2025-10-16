@@ -840,7 +840,418 @@ export default function CreateBillScreen({ navigation, route }) {
 
   const handlePrint = () => {
     if (Platform.OS === 'web') {
-      window.print();
+      // Create a new window with complete invoice
+      const printWindow = window.open('', '_blank');
+      const totals = calculateTotals();
+      
+      // Generate items table rows
+      const itemsRows = items.filter(i => i.description).map((item, index) => `
+        <tr>
+          <td style="text-align: center; padding: 8px; border: 1px solid #ccc;">${index + 1}</td>
+          <td style="padding: 8px; border: 1px solid #ccc;">${item.description}</td>
+          <td style="text-align: center; padding: 8px; border: 1px solid #ccc;">${item.qty}</td>
+          <td style="text-align: center; padding: 8px; border: 1px solid #ccc;">${item.unit || 'Nos'}</td>
+          <td style="text-align: center; padding: 8px; border: 1px solid #ccc;">₹${item.rate}</td>
+          <td style="text-align: center; padding: 8px; border: 1px solid #ccc;">${item.days} Days</td>
+          <td style="text-align: center; padding: 8px; border: 1px solid #ccc;">₹${item.amount.toFixed(2)}</td>
+        </tr>
+      `).join('');
+
+      const invoiceContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Invoice ${invoiceNo} - Vibrant Eventz Solution</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 8px;
+              background: white;
+              color: black;
+              font-size: 10px;
+              line-height: 1.2;
+            }
+            .invoice-container {
+              max-width: 100%;
+              margin: 0 auto;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 8px;
+            }
+            .logo {
+              width: 40px;
+              height: 40px;
+              background: #0ea5e9;
+              border-radius: 50%;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 5px;
+              color: white;
+              font-size: 20px;
+              font-weight: bold;
+            }
+            .company-name {
+              font-size: 14px;
+              font-weight: bold;
+              color: #0ea5e9;
+              margin-bottom: 2px;
+              letter-spacing: 0.5px;
+            }
+            .tagline {
+              font-size: 9px;
+              color: #666;
+              margin-bottom: 5px;
+            }
+            .invoice-title {
+              font-size: 12px;
+              font-weight: bold;
+              text-align: center;
+              margin: 8px 0;
+              border-bottom: 1px solid #ccc;
+              padding-bottom: 5px;
+            }
+            .info-grid {
+              display: table;
+              width: 100%;
+              border: 1px solid #ccc;
+              margin-bottom: 6px;
+            }
+            .info-row {
+              display: table-row;
+            }
+            .info-cell {
+              display: table-cell;
+              padding: 5px;
+              border: 1px solid #ccc;
+              vertical-align: top;
+            }
+            .info-left {
+              width: 60%;
+            }
+            .info-right {
+              width: 40%;
+            }
+            .section-title {
+              font-weight: bold;
+              margin-bottom: 3px;
+              font-size: 10px;
+            }
+            .info-line {
+              margin-bottom: 2px;
+              font-size: 9px;
+              line-height: 1.1;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 6px 0;
+            }
+            th, td {
+              border: 1px solid #ccc;
+              padding: 4px;
+              text-align: left;
+              font-size: 9px;
+            }
+            th {
+              background-color: #f5f5f5;
+              font-weight: bold;
+              text-align: center;
+              font-size: 9px;
+            }
+            .amount-section {
+              display: table;
+              width: 100%;
+              margin: 6px 0;
+            }
+            .amount-left {
+              display: table-cell;
+              width: 60%;
+              padding: 5px;
+              border: 1px solid #ccc;
+              vertical-align: top;
+            }
+            .amount-right {
+              display: table-cell;
+              width: 40%;
+              padding: 5px;
+              border: 1px solid #ccc;
+              text-align: right;
+            }
+            .total-row {
+              display: flex;
+              justify-content: space-between;
+              margin: 2px 0;
+              font-size: 9px;
+            }
+            .grand-total {
+              background: #d1fae5;
+              padding: 8px;
+              text-align: center;
+              font-size: 12px;
+              font-weight: bold;
+              margin: 6px 0;
+              border-radius: 3px;
+            }
+            .footer {
+              margin-top: 8px;
+              text-align: center;
+              font-size: 8px;
+              color: #666;
+            }
+            @media print {
+              @page {
+                margin: 0.5in;
+                size: A4;
+              }
+              body { 
+                margin: 0; 
+                padding: 0;
+                font-size: 11px;
+              }
+              .invoice-container { 
+                max-width: 100%;
+                padding: 15px;
+                page-break-inside: avoid;
+              }
+              .header {
+                margin-bottom: 12px;
+              }
+              .logo {
+                width: 45px !important;
+                height: 45px !important;
+                font-size: 22px !important;
+              }
+              .company-name {
+                font-size: 16px !important;
+              }
+              .tagline {
+                font-size: 10px !important;
+              }
+              .invoice-title {
+                font-size: 13px !important;
+                margin: 10px 0 !important;
+              }
+              .info-grid {
+                margin-bottom: 8px;
+                page-break-inside: avoid;
+              }
+              .info-cell {
+                padding: 6px !important;
+              }
+              .section-title {
+                font-size: 11px !important;
+              }
+              .info-line {
+                font-size: 10px !important;
+                margin-bottom: 3px !important;
+              }
+              table {
+                margin: 8px 0;
+                page-break-inside: avoid;
+              }
+              th, td {
+                padding: 5px !important;
+                font-size: 10px !important;
+              }
+              th {
+                font-size: 10px !important;
+              }
+              .amount-section {
+                margin: 8px 0;
+                page-break-inside: avoid;
+              }
+              .amount-left, .amount-right {
+                padding: 6px !important;
+              }
+              .grand-total {
+                margin: 10px 0;
+                padding: 10px;
+                font-size: 14px !important;
+                page-break-inside: avoid;
+              }
+              .footer {
+                margin-top: 10px;
+                font-size: 9px !important;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-container">
+            <!-- Header -->
+            <div class="header">
+              <div class="logo">V</div>
+              <div class="company-name">VIBRANT EVENTZ SOLUTION</div>
+              <div class="tagline">EVERYTHING IS POSSIBLE</div>
+            </div>
+
+            <div class="invoice-title">Tax Invoice - Original</div>
+
+            <!-- Company and Invoice Info -->
+            <div class="info-grid">
+              <div class="info-row">
+                <div class="info-cell info-left">
+                  <div class="section-title">Vibrant Eventz Solution</div>
+                  <div class="info-line">D/NO 25,NEW NO.1,GROUND FLOOR,BHARATHIYAR</div>
+                  <div class="info-line">IST STREET,TIRUALLA,TIRUCHIRAPALLI,TAMILNADU</div>
+                  <div class="info-line">PHONE: 6380001</div>
+                  <div class="info-line">Email: Travel Nadu</div>
+                  <div class="info-line">GSTIN/UIN: 33AACFV3551122</div>
+                  <div class="info-line">State Name: Tamil Nadu, Code: 33</div>
+                </div>
+                <div class="info-cell info-right">
+                  <div class="info-line"><strong>Invoice No.:</strong> ${invoiceNo}</div>
+                  <div class="info-line"><strong>Dated:</strong> ${date}</div>
+                  <div class="info-line"><strong>Delivery Note:</strong> ${deliveryDate}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Buyer Info -->
+            <div class="info-grid">
+              <div class="info-row">
+                <div class="info-cell">
+                  <div class="section-title">Buyer (Bill to)</div>
+                  <div class="info-line"><strong>${clientName}</strong></div>
+                  <div class="info-line">${clientAddress}</div>
+                  <div class="info-line">GSTIN/UIN: ${clientGSTIN || 'N/A'}</div>
+                  <div class="info-line">State Name: ${clientState || 'N/A'}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Details -->
+            <div class="info-grid">
+              <div class="info-row">
+                <div class="info-cell info-left">
+                  <div class="info-line"><strong>Buyer's Order No.:</strong> ${buyerOrderNo || 'N/A'}</div>
+                  <div class="info-line"><strong>Dated:</strong> ${orderDate || 'N/A'}</div>
+                  <div class="info-line"><strong>Dispatch Doc No.:</strong> ${dispatchDocNo || 'N/A'}</div>
+                  <div class="info-line"><strong>Dispatched through:</strong> ${dispatchedThrough || 'N/A'}</div>
+                  <div class="info-line"><strong>Destination:</strong> ${destination || 'N/A'}</div>
+                </div>
+                <div class="info-cell info-right">
+                  <div class="info-line"><strong>Mode/Terms of Payment:</strong> ${paymentMode}</div>
+                  <div class="info-line"><strong>Supplier's Ref:</strong> ${supplierRef || 'N/A'}</div>
+                  <div class="info-line"><strong>Other References:</strong> ${otherReferences || 'N/A'}</div>
+                  <div class="info-line"><strong>Delivery Note Date:</strong> ${deliveryDate}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Items Table -->
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 8%;">SI. No</th>
+                  <th style="width: 32%;">Description</th>
+                  <th style="width: 12%;">Quantity</th>
+                  <th style="width: 12%;">Unit</th>
+                  <th style="width: 12%;">Rate</th>
+                  <th style="width: 12%;">Per</th>
+                  <th style="width: 12%;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsRows}
+              </tbody>
+            </table>
+
+            <!-- Amount in Words and Total -->
+            <div class="amount-section">
+              <div class="amount-left">
+                <div class="section-title">Amount Chargeable (in Words):</div>
+                <div>Rupees ${numberToWords(totals.subtotal)} only</div>
+              </div>
+              <div class="amount-right">
+                <div class="total-row">
+                  <span>Total A:</span>
+                  <span>₹${totals.subtotal.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tax Table -->
+            <table>
+              <thead>
+                <tr>
+                  <th>HSN/SAC</th>
+                  <th>Taxable Value</th>
+                  <th>Central Tax</th>
+                  <th>State Tax</th>
+                  <th>Total Tax Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="text-align: center;">${hsnCode}</td>
+                  <td style="text-align: center;">₹${totals.subtotal.toFixed(2)}</td>
+                  <td style="text-align: center;">9% - ₹${totals.cgst.toFixed(2)}</td>
+                  <td style="text-align: center;">9% - ₹${totals.sgst.toFixed(2)}</td>
+                  <td style="text-align: center;">₹${(totals.cgst + totals.sgst).toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Tax Amount in Words -->
+            <div class="info-grid">
+              <div class="info-row">
+                <div class="info-cell">
+                  <div class="section-title">Tax Amount (in Words): INR</div>
+                  <div>Rupees ${numberToWords(totals.cgst + totals.sgst)} only</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grand Total -->
+            <div class="grand-total">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Total</span>
+                <span>₹${totals.grandTotal.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <!-- Bank Details -->
+            <div class="info-grid">
+              <div class="info-row">
+                <div class="info-cell">
+                  <div class="section-title">Company's Bank Details</div>
+                  <div class="info-line">A/C Holder Name: STATE BANK OF INDIA</div>
+                  <div class="info-line">For Vibrant Eventz Solution</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="info-grid">
+              <div class="info-row">
+                <div class="info-cell">
+                  <div class="section-title">Terms and Conditions:</div>
+                  <div class="info-line">We declare that this invoice shows the actual price of the Materials described and that all particulars are true and correct.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+              <div>This is a Computer Generated Invoice</div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      printWindow.document.write(invoiceContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then print
+      printWindow.onload = () => {
+        printWindow.print();
+        printWindow.close();
+      };
     } else {
       Alert.alert('Print', 'Print feature available on web version');
     }
@@ -896,17 +1307,32 @@ export default function CreateBillScreen({ navigation, route }) {
 
       <ScrollView style={styles.reviewContainer}>
       <View nativeID="invoice-content-for-pdf" style={styles.pdfContentWrapper}>
-      {/* Logo Header */}
-      <View style={styles.reviewLogoSection}>
-        <View style={styles.reviewLogo}>
-          <Text style={styles.reviewLogoText}>V</Text>
+      
+      {/* Company Details Section for Print */}
+      <View nativeID="company-details-section" testID="company-details-section" className="print-company-section">
+        {/* Logo Header */}
+        <View style={styles.reviewLogoSection} className="print-company-logo">
+          <View style={styles.reviewLogo}>
+            <Text style={styles.reviewLogoText}>V</Text>
+          </View>
+          <Text style={styles.reviewCompanyName} className="print-company-name">VIBRANT EVENTZ SOLUTION</Text>
+          <Text style={styles.reviewTagline} className="print-company-name">EVERYTHING IS POSSIBLE</Text>
         </View>
-        <Text style={styles.reviewCompanyName}>VIBRANT EVENTZ SOLUTION</Text>
-        <Text style={styles.reviewTagline}>EVERYTHING IS POSSIBLE</Text>
+        
+        {/* Company Information */}
+        <View style={styles.companyInfoPrint} className="print-company-info">
+          <Text style={styles.reviewInfoTitle} className="print-company-info">Vibrant Eventz Solution</Text>
+          <Text style={styles.reviewInfoText} className="print-company-info">D/NO 25,NEW NO.1,GROUND FLOOR,BHARATHIYAR</Text>
+          <Text style={styles.reviewInfoText} className="print-company-info">IST STREET,TIRUALLA,TIRUCHIRAPALLI,TAMILNADU</Text>
+          <Text style={styles.reviewInfoText} className="print-company-info">PHONE: 6380001</Text>
+          <Text style={styles.reviewInfoText} className="print-company-info">Email: Travel Nadu</Text>
+          <Text style={styles.reviewInfoText} className="print-company-info">GSTIN/UIN: 33AACFV3551122</Text>
+          <Text style={styles.reviewInfoText} className="print-company-info">State Name: Tamil Nadu, Code: 33</Text>
+        </View>
       </View>
 
       {/* Tax Invoice Header */}
-      <View style={styles.reviewInvoiceHeader}>
+      <View style={styles.reviewInvoiceHeader} nativeID="reviewInvoiceHeader">
         <Text style={styles.reviewInvoiceTitle}>Tax Invoice</Text>
         <Text style={styles.reviewOriginal}>Original</Text>
       </View>
@@ -939,7 +1365,7 @@ export default function CreateBillScreen({ navigation, route }) {
       </View>
 
       {/* Buyer Info */}
-      <View style={styles.reviewBuyerSection}>
+      <View style={styles.reviewBuyerSection} nativeID="reviewBuyerSection">
         <Text style={styles.reviewInfoTitle}>Buyer (Bill to)</Text>
         <Text style={styles.reviewBuyerName}>{clientName || 'ceffeeeec'}</Text>
         <Text style={styles.reviewBuyerText}>{clientAddress || 'eee'}</Text>
@@ -948,7 +1374,7 @@ export default function CreateBillScreen({ navigation, route }) {
       </View>
 
       {/* Order Details Grid */}
-      <View style={styles.reviewOrderGrid}>
+      <View style={styles.reviewOrderGrid} nativeID="reviewOrderGrid">
         <View style={styles.reviewOrderLeft}>
           <View style={styles.reviewOrderRow}>
             <Text style={styles.reviewOrderLabel}>Buyer's Order No.</Text>
@@ -992,7 +1418,7 @@ export default function CreateBillScreen({ navigation, route }) {
       </View>
 
       {/* Items Table */}
-      <View style={styles.reviewTable}>
+      <View style={styles.reviewTable} nativeID="reviewTable">
         <View style={styles.reviewTableHeader}>
           <Text style={[styles.reviewTableCell, { width: '8%' }]}>SI. No</Text>
           <Text style={[styles.reviewTableCell, { width: '32%' }]}>Description</Text>
@@ -1016,7 +1442,7 @@ export default function CreateBillScreen({ navigation, route }) {
       </View>
 
       {/* Amount in Words and Total */}
-      <View style={styles.reviewAmountSection}>
+      <View style={styles.reviewAmountSection} nativeID="reviewAmountSection">
         <View style={styles.reviewAmountLeft}>
           <Text style={styles.reviewAmountLabel}>Amount Chargeable (in Words):</Text>
           <Text style={styles.reviewAmountWords}>Rupees {numberToWords(totals.subtotal)} only</Text>
@@ -1030,7 +1456,7 @@ export default function CreateBillScreen({ navigation, route }) {
       </View>
 
       {/* Tax Table */}
-      <View style={styles.reviewTaxTable}>
+      <View style={styles.reviewTaxTable} nativeID="reviewTaxTable">
         <View style={styles.reviewTaxHeader}>
           <Text style={[styles.reviewTaxCell, { width: '20%' }]}>HSN/SAC</Text>
           <Text style={[styles.reviewTaxCell, { width: '20%' }]}>Taxable Value</Text>
@@ -1048,26 +1474,26 @@ export default function CreateBillScreen({ navigation, route }) {
       </View>
 
       {/* Tax Amount in Words */}
-      <View style={styles.reviewTaxWords}>
+      <View style={styles.reviewTaxWords} nativeID="reviewTaxWords">
         <Text style={styles.reviewTaxWordsLabel}>Tax Amount (in Words): INR</Text>
         <Text style={styles.reviewTaxWordsText}>Rupees {numberToWords(totals.cgst + totals.sgst)} only</Text>
       </View>
 
       {/* Grand Total */}
-      <View style={styles.reviewGrandTotal}>
+      <View style={styles.reviewGrandTotal} nativeID="reviewGrandTotal">
         <Text style={styles.reviewGrandTotalLabel}>Total</Text>
         <Text style={styles.reviewGrandTotalValue}>₹{totals.grandTotal.toFixed(2)}</Text>
       </View>
 
       {/* Bank Details */}
-      <View style={styles.reviewBankSection}>
+      <View style={styles.reviewBankSection} nativeID="reviewBankSection">
         <Text style={styles.reviewBankTitle}>Company's Bank Details</Text>
         <Text style={styles.reviewBankText}>A/C Holder Name: STATE BANK OF INDIA</Text>
         <Text style={styles.reviewBankText}>For Vibrant Eventz Solution</Text>
       </View>
 
       {/* Terms and Conditions */}
-      <View style={styles.termsSection}>
+      <View style={styles.termsSection} nativeID="termsSection">
         <Text style={styles.termsTitle}>Terms and Conditions:</Text>
         <Text style={styles.termsText}>
           We declare that this invoice shows the actual price of the Materials described and that all particulars are true and correct.
@@ -1075,7 +1501,7 @@ export default function CreateBillScreen({ navigation, route }) {
       </View>
 
       {/* Computer Generated */}
-      <View style={styles.computerGenerated}>
+      <View style={styles.computerGenerated} nativeID="computerGenerated">
         <Text style={styles.computerGeneratedText}>This is a Computer Generated Invoice</Text>
       </View>
 
@@ -1994,5 +2420,14 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#64748b',
     fontStyle: 'italic',
+  },
+  companyInfoPrint: {
+    alignItems: 'center',
+    marginTop: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    backgroundColor: '#f8fafc',
   },
 });

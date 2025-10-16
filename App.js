@@ -21,7 +21,7 @@ if (Platform.OS === 'web') {
   style.textContent = `
     @media print {
       @page {
-        margin: 5mm;
+        margin: 10mm;
         size: A4 portrait;
       }
       
@@ -36,41 +36,51 @@ if (Platform.OS === 'web') {
         padding: 0 !important;
       }
       
-      /* Hide all body children initially */
+      /* Hide everything by default */
       body * {
-        visibility: hidden !important;
-      }
-      
-      /* Show only invoice content and its children */
-      #invoice-content-for-pdf,
-      #invoice-content-for-pdf * {
-        visibility: visible !important;
-      }
-      
-      /* Force hide specific elements even if inside invoice */
-      #action-buttons-container,
-      #action-buttons-container *,
-      button,
-      button * {
         display: none !important;
-        visibility: hidden !important;
       }
       
-      /* Position and style invoice for single page */
-      #invoice-content-for-pdf {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 200mm !important;
-        max-width: 200mm !important;
-        padding: 8mm !important;
+      /* Show only the company details section - try multiple selectors */
+      #company-details-section,
+      [data-testid="company-details-section"],
+      div[id="company-details-section"] {
+        display: block !important;
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 20px !important;
         margin: 0 !important;
         background: white !important;
-        box-sizing: border-box !important;
-        page-break-inside: avoid !important;
-        page-break-after: avoid !important;
-        transform: scale(0.88) !important;
-        transform-origin: top left !important;
+        text-align: center !important;
+        font-family: Arial, sans-serif !important;
+      }
+      
+      /* Show all children of company details */
+      #company-details-section *,
+      [data-testid="company-details-section"] *,
+      div[id="company-details-section"] * {
+        display: block !important;
+        color: black !important;
+        background: white !important;
+      }
+      
+      /* Alternative approach - show specific content by class */
+      .print-company-section,
+      .print-company-logo,
+      .print-company-name,
+      .print-company-info {
+        display: block !important;
+        color: black !important;
+        background: white !important;
+        margin: 10px 0 !important;
+        text-align: center !important;
+      }
+      
+      .print-company-section * {
+        display: block !important;
+        color: black !important;
+        background: white !important;
       }
     }
   `;
